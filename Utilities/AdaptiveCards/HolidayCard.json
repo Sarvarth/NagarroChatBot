@@ -1,0 +1,53 @@
+﻿{
+  "type": "AdaptiveCard",
+  "backgroundImage": "http://a.rgbimg.com/users/x/xy/xymonau/300/mX8RmzI.jpg",
+  "body": [
+    {
+      "type": "Image",
+      "horizontalAlignment": "Center",
+      "spacing": "None",
+      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNtVYnBWgjKUk4lMmYpzSg-N3H25nJRsjgxX_5jBxkAREwEIUBAQ",
+      "size": "Large"
+    },
+    {
+      "type": "TextBlock",
+      "id": "Title",
+      "horizontalAlignment": "Center",
+      "size": "Large",
+      "weight": "Bolder",
+      "text": " {Title}",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "id": "{Date}",
+      "horizontalAlignment": "Center",
+      "spacing": "Medium",
+      "size": "Large",
+      "weight": "Bolder",
+      "color": "Dark",
+      "text": "{DayOfWeek} {Date.Date}"
+    },
+    {
+      "type": "TextBlock",
+      "id": "{Description}",
+      "horizontalAlignment": "Center",
+      "spacing": "Medium",
+      "text": "{Description}",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "id": "{HolidayType}",
+      "horizontalAlignment": "Center",
+      "spacing": "Medium",
+      "separator": true,
+      "weight": "Bolder",
+      "color": "Accent",
+      "text": "It's a {HolidayType} holiday"
+    }
+  ],
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.0",
+  "speak": "<s>Made by Sarvarth Monga</s>"
+}
