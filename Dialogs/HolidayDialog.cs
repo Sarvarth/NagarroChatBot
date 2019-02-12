@@ -24,7 +24,6 @@ namespace SimpleEchoBot.Dialogs
         }
         public async Task StartAsync(IDialogContext context)
         {
-            await context.PostAsync("Inside HolidayDialog");
             context.Wait(ShowFlexibleHolidays);
         }
 

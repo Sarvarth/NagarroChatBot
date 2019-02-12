@@ -18,7 +18,6 @@ namespace SimpleEchoBot.Dialogs
         }
         public async Task StartAsync(IDialogContext context)
         {
-            await context.PostAsync("Inside ApplyLeaveDialog");
             var leaveApplicationForm = new FormDialog<LeaveRequest>(new LeaveRequest(), LeaveRequest.BuildForm, FormOptions.PromptInStart, this._entities);
             context.Call(leaveApplicationForm, ApplyForLeave);
         }

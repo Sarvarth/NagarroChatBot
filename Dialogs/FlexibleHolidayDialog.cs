@@ -24,7 +24,6 @@ namespace SimpleEchoBot.Dialogs
         }
         public async Task StartAsync(IDialogContext context)
         {
-            await context.PostAsync("Inside FlexibleHolidayDialog");
             context.Wait(ShowFlexibleHolidays);
         }
 
@@ -90,9 +89,9 @@ namespace SimpleEchoBot.Dialogs
         {
             if (activity.Text.Contains("Opt In"))
             {
-
                 return true;
             }
+
             return false;
         }
     }

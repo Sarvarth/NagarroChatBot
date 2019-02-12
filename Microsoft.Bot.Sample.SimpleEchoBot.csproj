@@ -176,10 +176,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="AzureStorage\AzureTableManager.cs" />
+    <Compile Include="AzureStorage\Entities\FlexibleHolidayEntity.cs" />
+    <Compile Include="AzureStorage\Entities\LeaveEntity.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="DataWarehouse\DataWarehouse.cs" />
     <Compile Include="Dialogs\ApplyLeaveDialog.cs" />
-    <Compile Include="Dialogs\EchoDialog.cs" />
     <Compile Include="Dialogs\FlexibleHolidayDialog.cs" />
     <Compile Include="Dialogs\GreetingDialog.cs" />
     <Compile Include="Dialogs\HolidayDialog.cs" />
@@ -200,7 +202,9 @@
     <Compile Include="Services\FlexibleHolidayService.cs" />
     <Compile Include="Services\HolidayService.cs" />
     <Compile Include="Services\LeaveService.cs" />
+    <Compile Include="Services\UserService.cs" />
     <Compile Include="Utilities\AdaptiveCardJsonManager.cs" />
+    <Compile Include="Utilities\Mapper\Mapper.cs" />
     <None Include="Utilities\AdaptiveCards\FlexibleHolidayCard.json" />
     <Compile Include="Utilities\HeroCardManager.cs" />
   </ItemGroup>

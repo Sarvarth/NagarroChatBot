@@ -9,6 +9,8 @@ namespace SimpleEchoBot.Models
     [Serializable]
     public class LeaveRequest
     {
+        [IgnoreField]
+        public string Id { get; set; }
         [Describe("Reason of your leave")]
         public string Reason { get; set; }
 
@@ -38,6 +40,11 @@ namespace SimpleEchoBot.Models
                         result.IsValid = false;
                         result.Feedback = "The Leave Start Date you entered is in the past";
                     }
+                    if(startDate > now.AddYears(1))
+                    {
+                        result.IsValid = false;
+                        result.Feedback = "You cannot apply for a leave which is 1 year from now";
+                    }
                     return result;
                 })
                 .Field(nameof(EndDate), validate: async (state, value) => 
@@ -51,6 +58,12 @@ namespace SimpleEchoBot.Models
                         {
                             result.IsValid = false;
                             result.Feedback = "The Leave End Date you entered is in the past";
+                            return result;
+                        }
+                        else if(endDate > now.AddYears(1))
+                        {
+                            result.IsValid = false;
+                            result.Feedback = "You cannot apply for a leave which is 1 year from now";
                             return result;
                         }
                         else if(endDate.Date < state.StartDate.Date)
@@ -71,7 +84,7 @@ namespace SimpleEchoBot.Models
                         return result;
                     }
                 })
-                .AddRemainingFields()
+                .Field(nameof(Comments))
                 .Confirm("Is this information correct \n {*filled}")
                 .Build();
         }

@@ -66,5 +66,10 @@ namespace SimpleEchoBot.Services
                 };
             }
         }
+
+        public async Task<Holiday> GetHolidayAsync(int holidayId)
+        {
+            return DataWarehouse.DataWarehouse.Holidays.FirstOrDefault(x => x.Id == holidayId);
+        }
     }
 }

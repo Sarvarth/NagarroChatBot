@@ -45,20 +45,35 @@ namespace SimpleEchoBot.Utilities
 
                 return adaptiveCardJsonToModify.ToString();
             }
+            else if(typeof(T) == typeof(HolidayModel))
+            {
+                HolidayModel holiday = card as HolidayModel;
+                StringBuilder adaptiveCardJsonToModify = new StringBuilder(File.ReadAllText(pathToFiles));
+                foreach (var prop in card.GetType().GetProperties())
+                {
+                    adaptiveCardJsonToModify.Replace("{" + prop.Name + "}", prop.GetValue(holiday).ToString());
+                }
+                adaptiveCardJsonToModify.Replace("{DayOfWeek}", holiday.Date.DayOfWeek.ToString()).Replace("{Date.Date}", holiday.Date.ToString("dd/MM/yyyy"));
+
+                return adaptiveCardJsonToModify.ToString();
+            }
             else
             {
                 LeaveRequest leaveRequest = card as LeaveRequest;
                 StringBuilder adaptiveCardJsonToModify = new StringBuilder(File.ReadAllText(pathToFiles));
                 foreach (var prop in leaveRequest.GetType().GetProperties())
                 {
-                    adaptiveCardJsonToModify.Replace("{" + prop.Name + "}", prop.GetValue(leaveRequest).ToString());
+                    adaptiveCardJsonToModify.Replace("{" + prop.Name + "}", prop?.GetValue(leaveRequest)?.ToString());
                 }
                 adaptiveCardJsonToModify.Replace("{StartDate.DayOfWeek}", leaveRequest.StartDate.DayOfWeek.ToString()).Replace("{StartDate.Date}", leaveRequest.StartDate.ToString("dd/MM/yyyy"));
                 if (leaveRequest.EndDate != null)
                 {
                     adaptiveCardJsonToModify = adaptiveCardJsonToModify.Append("\n To \n");
-                    adaptiveCardJsonToModify.Replace("{End.DayOfWeek}", leaveRequest.EndDate?.DayOfWeek.ToString()).Replace("{EndDate.Date}", leaveRequest.EndDate?.ToString("dd/MM/yyyy"));
-
+                    adaptiveCardJsonToModify.Replace("{EndDate.DayOfWeek}", leaveRequest.EndDate?.DayOfWeek.ToString()).Replace("{EndDate.Date}", leaveRequest.EndDate?.ToString("dd/MM/yyyy"));
+                }
+                else
+                {
+                    adaptiveCardJsonToModify.Replace("{EndDate.DayOfWeek}", "").Replace("{EndDate.Date}", "");
                 }
 
                 return adaptiveCardJsonToModify.ToString();
