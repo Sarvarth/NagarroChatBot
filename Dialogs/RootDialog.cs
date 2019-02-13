@@ -1,4 +1,5 @@
 ﻿using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
@@ -20,6 +21,12 @@ namespace SimpleEchoBot.Dialogs
         private const string usernameKey = "username";
         private const string flexibleEntity = "Flexible";
         private const string reasonEntity = "Reason";
+        private const string cancelEntity = "Cancel";
+        private const string noneIntent = "None";
+        private const string greetingIntent = "Greeting";
+        private const string viewHolidayIntent = "ViewHoliday";
+        private const string applyLeaveIntent = "ApplyLeave";
+        private const string showRequestIntent = "ShowRequest";
 
         private HolidayService holidayService;
         private FlexibleHolidayService flexibleHolidayService;
@@ -43,17 +50,22 @@ namespace SimpleEchoBot.Dialogs
         }
 
         [LuisIntent("")]
-        [LuisIntent("None")]
+        [LuisIntent(noneIntent)]
         public async Task NoneIntent(IDialogContext context, LuisResult result)
         {
+            var hasCanceEntity = await TryFind(result, cancelEntity);
+            if (hasCanceEntity)
+            {
+                await context.PostAsync("We do not handle cancellation of requests currently \U0001F600");
+            }
+
             string message = $"Sorry, I did not understand '{result.Query}'. \U0001F600 \U0001F600 Type 'help' if you need assistance.";
-            //PromptDialog.Confirm(context, AfterPromptForSnoozing, "Do you want to snooze this alarm?");
             await context.PostAsync(message);
 
             context.Wait(this.MessageReceived);
         }
 
-        [LuisIntent("Greeting")]
+        [LuisIntent(greetingIntent)]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
             var hasUsername = context.UserData.ContainsKey(usernameKey);
@@ -65,153 +77,191 @@ namespace SimpleEchoBot.Dialogs
             }
             else
             {
-                await context.PostAsync("What is your name");
-                context.Call(new GreetingDialog(), SetUsername);
+                await context.PostAsync("Hello, What is your name?");
+                context.Call(new GreetingDialog(false), SetUsername);
             }
         }
 
-        [LuisIntent("ViewHoliday")]
+        [LuisIntent(viewHolidayIntent)]
         public async Task HolidayIntent(IDialogContext context, LuisResult result)
         {
             var hasUsername = context.UserData.ContainsKey(usernameKey);
             if (!hasUsername)
             {
-                await context.PostAsync("First tell me your name \U0001F61C");
-                context.Call(new GreetingDialog(), SetUsername);
-            }
-
-            if(result.AlteredQuery != null)
-            {
-                await context.PostAsync($"Searching for {result.AlteredQuery} \U0001F609");
-            }
-
-            var hasFlexibleEntity = await TryFind(result, flexibleEntity);
-
-            DateTime startTime;
-            DateTime? endTime;
-            var hasDate = TryGetDateRange(result, true, out startTime, out endTime);
-            var dateRange = new DateRangeDTO(startTime, endTime);
-
-            if (hasFlexibleEntity)
-            {
-                await context.Forward(new FlexibleHolidayDialog(dateRange, holidayService), AfterFlexibleHolidayIntent, result, CancellationToken.None);
+                await context.PostAsync("First tell me your name first \U0001F61C");
+                await context.Forward(new GreetingDialog(true), SetUsername, result , CancellationToken.None);
             }
             else
             {
-                await context.Forward(new HolidayDialog(dateRange, holidayService), AfterHolidayIntent, result, CancellationToken.None);
+                if (result.AlteredQuery != null)
+                {
+                    await context.PostAsync($"Searching for {result.AlteredQuery} \U0001F609");
+                }
+
+
+                var hasFlexibleEntity = await TryFind(result, flexibleEntity);
+
+                DateTime startTime;
+                DateTime? endTime;
+                var hasDate = TryGetDateRange(result, true, out startTime, out endTime);
+                var dateRange = new DateRangeDTO(startTime, endTime);
+
+                if (hasFlexibleEntity)
+                {
+                    await context.Forward(new FlexibleHolidayDialog(dateRange, holidayService), AfterFlexibleHolidayIntent, result, CancellationToken.None);
+                }
+                else
+                {
+                    await context.Forward(new HolidayDialog(dateRange, holidayService), AfterHolidayIntent, result, CancellationToken.None);
+                }
             }
+            
         }
 
-        [LuisIntent("ApplyLeave")]
+        [LuisIntent(applyLeaveIntent)]
         public async Task ApplyLeaveIntent(IDialogContext context, LuisResult result)
         {
             var hasUsername = context.UserData.ContainsKey(usernameKey);
             if (!hasUsername)
             {
                 await context.PostAsync("First tell me your name \U0001F61C");
-                context.Call(new GreetingDialog(), SetUsername);
-            }
-
-            var hasFlexibleEntity = await TryFind(result, flexibleEntity);
-
-            DateTime startTime;
-            DateTime? endTime;
-            var hasDate = TryGetDateRange(result, false, out startTime, out endTime);
-            var dateRange = new DateRangeDTO(startTime, endTime);
-
-            if (hasFlexibleEntity)
-            {
-                await context.PostAsync("It seems like you want to take a flexible holiday");
-                await context.Forward(new FlexibleHolidayDialog(dateRange, holidayService), AfterFlexibleHolidayIntent, result, CancellationToken.None);
+                await context.Forward(new GreetingDialog(true), SetUsername, result, CancellationToken.None);
             }
             else
             {
-                List<EntityRecommendation> entities = new List<EntityRecommendation>();
-                var hasReasonEntity = await TryFind(result, reasonEntity);
-                if (hasReasonEntity)
+                if (result.AlteredQuery != null)
                 {
-                    entities.Add(GetEntity(result, reasonEntity));
+                    await context.PostAsync($"Searching for {result.AlteredQuery} \U0001F609");
                 }
-                if (hasDate)
-                {
-                    entities.Add(new EntityRecommendation { Type = "StartDate", Entity = startTime.ToString() });
-                    if (endTime != null)
-                    {
-                        entities.Add(new EntityRecommendation { Type = "EndDate", Entity = endTime.ToString() });
-                    }
-                }
+                var hasFlexibleEntity = await TryFind(result, flexibleEntity);
 
-                context.Call(new ApplyLeaveDialog(entities), AfterApplyLeaveRequest);
+                DateTime startTime;
+                DateTime? endTime;
+                var hasDate = TryGetDateRange(result, false, out startTime, out endTime);
+                var dateRange = new DateRangeDTO(startTime, endTime);
+
+                if (hasFlexibleEntity)
+                {
+                    await context.PostAsync("It seems like you want to take a flexible holiday");
+                    await context.Forward(new FlexibleHolidayDialog(dateRange, holidayService), AfterFlexibleHolidayIntent, result, CancellationToken.None);
+                }
+                else
+                {
+                    List<EntityRecommendation> entities = new List<EntityRecommendation>();
+                    var hasReasonEntity = await TryFind(result, reasonEntity);
+                    if (hasReasonEntity)
+                    {
+                        entities.Add(GetEntity(result, reasonEntity));
+                    }
+                    if (hasDate)
+                    {
+                        entities.Add(new EntityRecommendation { Type = "StartDate", Entity = startTime.ToString() });
+                        if (endTime != null)
+                        {
+                            entities.Add(new EntityRecommendation { Type = "EndDate", Entity = endTime.ToString() });
+                        }
+                    }
+
+                    context.Call(new ApplyLeaveDialog(entities), AfterApplyLeaveRequest);
+                }
             }
+            
         }
 
-        [LuisIntent("ShowRequest")]
+        [LuisIntent(showRequestIntent)]
         public async Task ShowRequestIntent(IDialogContext context, LuisResult result)
         {
             var hasUsername = context.UserData.ContainsKey(usernameKey);
             if (!hasUsername)
             {
                 await context.PostAsync("First tell me your name \U0001F61C");
-                context.Call(new GreetingDialog(), SetUsername);
-            }
-
-            var hasFlexibleEntity = await TryFind(result, flexibleEntity);
-            var hasLeaveEntity = await TryFind(result, "Leave");
-
-            DateTime startTime;
-            DateTime? endTime;
-            var hasDate = TryGetDateRange(result, true, out startTime, out endTime);
-            var dateRange = new DateRangeDTO(startTime, endTime);
-
-            if (hasFlexibleEntity && hasLeaveEntity)
-            {
-                await context.PostAsync("It seems like you want to view your Opted In flexible holidays and your leaves also");
-                await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.All), AfterShowRequestIntent, result, CancellationToken.None);
-
-            }
-            else if (hasFlexibleEntity)
-            {
-                await context.PostAsync("It seems like you want to view your Opted In flexible holidays only");
-                await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.Flexible), AfterShowRequestIntent, result, CancellationToken.None);
-
-            }
-            else if (hasLeaveEntity)
-            {
-                await context.PostAsync("It seems like you want to view your leaves only");
-                await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.Leave), AfterShowRequestIntent, result, CancellationToken.None);
+                await context.Forward(new GreetingDialog(true), SetUsername, result, CancellationToken.None);
             }
             else
             {
-                await context.PostAsync("It seems like you want to view your submitted requests");
-                await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.All), AfterShowRequestIntent, result, CancellationToken.None);
+                if (result.AlteredQuery != null)
+                {
+                    await context.PostAsync($"Searching for {result.AlteredQuery} \U0001F609");
+                }
 
+                var hasFlexibleEntity = await TryFind(result, flexibleEntity);
+                var hasLeaveEntity = await TryFind(result, "Leave");
+
+                DateTime startTime;
+                DateTime? endTime;
+                var hasDate = TryGetDateRange(result, true, out startTime, out endTime);
+                var dateRange = new DateRangeDTO(startTime, endTime);
+
+                if (hasFlexibleEntity && hasLeaveEntity)
+                {
+                    await context.PostAsync("It seems like you want to view your Opted In flexible holidays and your leaves also");
+                    await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.All), AfterShowRequestIntent, result, CancellationToken.None);
+
+                }
+                else if (hasFlexibleEntity)
+                {
+                    await context.PostAsync("It seems like you want to view your Opted In flexible holidays only");
+                    await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.Flexible), AfterShowRequestIntent, result, CancellationToken.None);
+
+                }
+                else if (hasLeaveEntity)
+                {
+                    await context.PostAsync("It seems like you want to view your leaves only");
+                    await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.Leave), AfterShowRequestIntent, result, CancellationToken.None);
+                }
+                else
+                {
+                    await context.PostAsync("It seems like you want to view your submitted requests");
+                    await context.Forward(new ShowRequestDialog(dateRange, ShowRequest.All), AfterShowRequestIntent, result, CancellationToken.None);
+
+                }
             }
+            
         }
 
         private async Task AfterShowRequestIntent(IDialogContext context, IAwaitable<object> result)
         {
-            await context.PostAsync("You have viewed your requests");
+            await context.PostAsync("You have viewed your request");
+
+            await context.PostAsync("Thank You !!, Taking you back to home");
             context.Done<object>(null);
         }
 
         private async Task AfterApplyLeaveRequest(IDialogContext context, IAwaitable<object> result)
         {
-            var leaveRequest = (LeaveRequest)await result;
-            var username = UserService.GetUsername(context);
-            var leaveSubmitted = await leaveService.LeaveValidator(username, leaveRequest);
-            if (leaveSubmitted.IsValid)
+            try
             {
-                await leaveService.TakeLeave(username, leaveRequest);
-                await context.PostAsync("Your request has been succesfully submitted");
-                if (!string.IsNullOrWhiteSpace(leaveSubmitted.Message))
+                var leaveRequest = (LeaveRequest)await result;
+                var username = UserService.GetUsername(context);
+                var leaveSubmitted = await leaveService.LeaveValidator(username, leaveRequest);
+                if (leaveSubmitted.IsValid)
                 {
-                    await context.PostAsync($"Just a suggestion!! {leaveSubmitted.Message}");
+                    await leaveService.TakeLeave(username, leaveRequest);
+                    await context.PostAsync("Your request has been succesfully submitted");
+                    if (!string.IsNullOrWhiteSpace(leaveSubmitted.Message))
+                    {
+                        await context.PostAsync($"Just a suggestion!! {leaveSubmitted.Message}");
+                    }
+                }
+                else
+                {
+                    await context.PostAsync("Your request has been denied!!");
+                    await context.PostAsync($"{leaveSubmitted.Message}");
                 }
             }
-            else
+            catch(FormCanceledException ex)
             {
-                await context.PostAsync("Your request has been denied!!");
-                await context.PostAsync($"{leaveSubmitted.Message}");
+                await context.PostAsync("You have cancelled your leave request");
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync("Sorry there seems an issue currently \n Please try again later");
+            }
+            finally
+            {
+                await context.PostAsync("Thank You !!, Taking you back to home");
+
+                context.Done<object>(null);
             }
 
         }
@@ -238,12 +288,15 @@ namespace SimpleEchoBot.Dialogs
                     }
                 }
             }
+
             catch (Exception ex)
             {
                 await context.PostAsync("Sorry there seems an issue currently \n Please try again later");
             }
             finally
             {
+                await context.PostAsync("Thank You !!, Taking you back to home");
+
                 context.Done<object>(null);
             }
 
@@ -251,6 +304,7 @@ namespace SimpleEchoBot.Dialogs
 
         private async Task AfterHolidayIntent(IDialogContext context, IAwaitable<object> result)
         {
+            await context.PostAsync("Thank You !!, Taking you back to home");
             context.Done<object>(null);
         }
 
@@ -316,6 +370,7 @@ namespace SimpleEchoBot.Dialogs
         {
             var name = await result;
             context.UserData.SetValue("username", name);
+            await context.PostAsync($"Your username is {name}, I will always remember you using your username");
             await context.PostAsync($"Hello {name}, How may i help you");
         }
 

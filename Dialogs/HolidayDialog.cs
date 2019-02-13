@@ -24,10 +24,10 @@ namespace SimpleEchoBot.Dialogs
         }
         public async Task StartAsync(IDialogContext context)
         {
-            context.Wait(ShowFlexibleHolidays);
+            context.Wait(ShowHolidays);
         }
 
-        private async Task ShowFlexibleHolidays(IDialogContext context, IAwaitable<object> result)
+        private async Task ShowHolidays(IDialogContext context, IAwaitable<object> result)
         {
             try
             {

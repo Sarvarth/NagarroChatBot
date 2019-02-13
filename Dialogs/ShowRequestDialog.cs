@@ -52,7 +52,10 @@ namespace SimpleEchoBot.Dialogs
 
                             resultMessage.Attachments = AdaptiveCardJsonManager.CreateCards(flexibleHolidays).ToList();
 
-                            await context.PostAsync(resultMessage);
+                            if (resultMessage.Attachments.Any())
+                            {
+                                await context.PostAsync(resultMessage);
+                            }
                             break;
                         }
                     case ShowRequest.Leave:
@@ -67,7 +70,10 @@ namespace SimpleEchoBot.Dialogs
 
                             resultMessage.Attachments = AdaptiveCardJsonManager.CreateCards(leaves).ToList();
 
-                            await context.PostAsync(resultMessage);
+                            if (resultMessage.Attachments.Any())
+                            {
+                                await context.PostAsync(resultMessage);
+                            }
                             break;
                         }
                     case ShowRequest.All:
@@ -82,6 +88,10 @@ namespace SimpleEchoBot.Dialogs
 
                             resultFlexibleHolidayMessage.Attachments = AdaptiveCardJsonManager.CreateCards(flexibleHolidays).ToList();
 
+                            if (resultFlexibleHolidayMessage.Attachments.Any())
+                            {
+                                await context.PostAsync(resultFlexibleHolidayMessage);
+                            }
                             await context.PostAsync(resultFlexibleHolidayMessage);
 
 
@@ -95,7 +105,10 @@ namespace SimpleEchoBot.Dialogs
 
                             resultMessage.Attachments = AdaptiveCardJsonManager.CreateCards(leaves).ToList();
 
-                            await context.PostAsync(resultMessage);
+                            if (resultMessage.Attachments.Any())
+                            {
+                                await context.PostAsync(resultMessage);
+                            }
 
                             break;
                         }

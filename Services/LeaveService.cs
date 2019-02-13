@@ -14,6 +14,7 @@ namespace SimpleEchoBot.Services
     [Serializable]
     public class LeaveService
     {
+        private const string userLeavesTable = "userleaves";
         private HolidayService holidayService;
         private FlexibleHolidayService flexibleHolidayService;
 
@@ -34,7 +35,7 @@ namespace SimpleEchoBot.Services
                 return new ValidatorDTO
                 {
                     IsValid = false,
-                    Message = $"You have opted in for a flexible holiday on {optedInHolidays.First().Date.ToString("dd/mm/yyyy")}"
+                    Message = $"You have opted in for a flexible holiday on {optedInHolidays.First().Date.ToString("dd/MM/yyyy")}"
                 };
             }
 
@@ -45,7 +46,7 @@ namespace SimpleEchoBot.Services
         }
         public async Task TakeLeave(string username, LeaveRequest leaveRequest)
         {
-            var tableManager = new AzureTableManager("userleaves");
+            var tableManager = new AzureTableManager(userLeavesTable);
             // Make an entry in Azure Table Storage for the same
             // Using BatchOperation to add these bulk leaveRequests
             leaveRequest.Id = Guid.NewGuid().ToString();
@@ -80,7 +81,7 @@ namespace SimpleEchoBot.Services
         }
         public async Task<List<LeaveRequest>> GetLeaveAsync(string username, DateRangeDTO dateRange)
         {
-            var tableManager = new AzureTableManager("userleaves");
+            var tableManager = new AzureTableManager(userLeavesTable);
 
             string leaveDateQuery;
 
@@ -148,7 +149,7 @@ namespace SimpleEchoBot.Services
                         return new ValidatorDTO
                         {
                             IsValid = false,
-                            Message = suggestion
+                            Message = $"You cannot take a leave on a public holiday which is on {date.ToString("dd/MM/yyyy")}"
                         };
                     }
                 }

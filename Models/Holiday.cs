@@ -6,7 +6,7 @@ using System.Web;
 
 namespace SimpleEchoBot.Models
 {
-    public class Holiday : HolidayModel
+    public class Holiday
     {
         public int Id { get; set; }
         public string Title { get; set; }

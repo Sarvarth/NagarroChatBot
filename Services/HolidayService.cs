@@ -20,6 +20,11 @@ namespace SimpleEchoBot.Services
             {
                 holidays = holidays.Where(x => x.Date.Date <= dateRange.EndDate?.Date);
             }
+            else
+            {
+                holidays = holidays.Where(x => x.Date.Date == dateRange.StartDate.Date);
+            }
+
             if (getFlexibleHolidaysOnly)
             {
                 holidays = holidays

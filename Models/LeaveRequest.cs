@@ -28,7 +28,7 @@ namespace SimpleEchoBot.Models
         public static IForm<LeaveRequest> BuildForm()
         {
             return new FormBuilder<LeaveRequest>()
-                .Message("Welcome to Leave Request Form")
+                .Message("Welcome to Leave Request Form \n Enter 'quit' to exit the form")
                 .Field(nameof(Reason))
                 .Field(nameof(StartDate), validate: async (state, value) => 
                 {

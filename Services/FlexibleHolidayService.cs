@@ -15,6 +15,7 @@ namespace SimpleEchoBot.Services
     public class FlexibleHolidayService
     {
         //private AzureTableManager tableManager;
+        private const string userFlexibleHolidaysTable = "userflexibleholidays";
         private HolidayService holidayService;
 
         public FlexibleHolidayService()
@@ -24,7 +25,7 @@ namespace SimpleEchoBot.Services
 
         public async Task<ValidatorDTO> OptInValidator(string username, int holidayId)
         {
-            var tableManager = new AzureTableManager("userflexibleholidays");
+            var tableManager = new AzureTableManager(userFlexibleHolidaysTable);
 
             // Check if user has already opted in for the same
             var hasUserOptedIn = await HasUserOptedIn(username, holidayId);
@@ -56,7 +57,7 @@ namespace SimpleEchoBot.Services
         }
         public async Task OptUserIn(string username, int holidayId)
         {
-            var tableManager = new AzureTableManager("userflexibleholidays");
+            var tableManager = new AzureTableManager(userFlexibleHolidaysTable);
 
             // Make an entry in Azure Table Storage for the same
             var flexibleHoliday = await holidayService.GetHolidayAsync(holidayId);
@@ -70,7 +71,7 @@ namespace SimpleEchoBot.Services
         }
         public async Task<List<Holiday>> GetOptedInHolidays(string username, DateRangeDTO dateRange)
         {
-            var tableManager = new AzureTableManager("userflexibleholidays");
+            var tableManager = new AzureTableManager(userFlexibleHolidaysTable);
 
             string optInHolidayDateQuery;
 
@@ -101,7 +102,7 @@ namespace SimpleEchoBot.Services
         }
         private async Task<bool> HasUserOptedIn(string username, int holidayId)
         {
-            var tableManager = new AzureTableManager("userflexibleholidays");
+            var tableManager = new AzureTableManager(userFlexibleHolidaysTable);
 
             // Check if user has already opted in for this holiday
             return await tableManager.DoesEntityExist(username, holidayId.ToString());

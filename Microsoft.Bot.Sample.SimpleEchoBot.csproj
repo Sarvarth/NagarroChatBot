@@ -205,6 +205,8 @@
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Utilities\AdaptiveCardJsonManager.cs" />
     <Compile Include="Utilities\Mapper\Mapper.cs" />
+    <None Include="Properties\PublishProfiles\basicbottemplatesolution-Web-Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\nagpbotnagarro - Web Deploy.pubxml" />
     <None Include="Utilities\AdaptiveCards\FlexibleHolidayCard.json" />
     <Compile Include="Utilities\HeroCardManager.cs" />
   </ItemGroup>

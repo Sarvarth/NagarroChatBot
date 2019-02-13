@@ -41,7 +41,10 @@ namespace SimpleEchoBot.Dialogs
 
                 resultMessage.Attachments = HeroCardManager.CreateFlexibleHolidayCards(flexibleHolidays).ToList();
 
+
                 await context.PostAsync(resultMessage);
+                await context.PostAsync("If you want to leave this panel, enter quit");
+
                 context.Wait(OptInRequest);
 
             }
@@ -68,7 +71,15 @@ namespace SimpleEchoBot.Dialogs
             if (!await HandleButtonClick(context, activity))
             {
                 await context.PostAsync("You did not Opt into any Flexible holiday");
-                await context.Forward(new RootDialog(), AfterNoOptInRequest, activity);
+                await context.PostAsync("If you want to leave this panel, enter quit");
+                if (activity.Text.ToLower() == "quit" || activity.Text.ToLower().Contains("cancel"))
+                {
+                    context.Done<object>(null);
+                }
+                else
+                {
+                    await context.PostAsync("If you want to leave this panel, enter quit");
+                }
             }
             else
             {
